@@ -1,0 +1,245 @@
+---
+title: " Mixed-model QTL detection by linkage analysis"
+author: "Lucia Gutierrez"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(lmem.qtler)
+```
+
+## Introduction
+  Most of the traits that plant breeders work with in their breeding programs are
+quantitative traits. What complicates the breeding task is that trait’s variation is 
+the result of a large number of QTL (Quantitative Trait Loci), each one with a minor
+effect. The objective of QTL mapping is to dissect the complexity of quantitative
+traits by identifying as many as possible of the individual QTLs. 
+This is sometimes referred to as ‘Mendelizing’ complex traits.
+  A typical QTL experiment (linkage analysis) consists in developing a segregating 
+population; normally by crossing two inbreed lines. Typical segregating populations 
+are originating by selfing the F1 hybrid for one generation (F2), or for several
+generations to produce recombinant inbred lines (RIL). It is also to use biotechnology 
+techniques that duplicate F1 gametes originating double haploids (DH). In other cases, 
+the F1 is crossed again to one of the parental lines giving origin to a backcross (BC).
+  Independently of the type of segregating population, QTL detection is nothing
+else than finding statistical associations between the observed phenotypic variation 
+and the variation assessed with molecular markers. The main purpose of a QTL experiment
+is to answer the following questions:
+
+* Number of QTLs affecting a trait of interest? 
+
+* The location of the QTLs? i.e. on which chromosomes and position within
+  chromosome do they locate. Also, it is usually interesting to define a confidence
+  interval for the QTL location.
+  
+* The size of the QTL effect? And an estimate of precision of that estimate (standard
+  error).
+  
+* Which parent is contributing the favorable allele?
+
+  In answering those questions, a breeder can make decisions to use the QTL information
+in his/her breeding strategy, for example in the form of marker-assisted selection.
+Several methods have been proposed for QTL detection, but roughly speaking methods fall
+in two groups; those based on mixture models (Lander and Botstein 1989), and those
+ba sed on regression ideas (Haley and Knott 1992; Martínez and Curnow 1992). 
+For completeness, we should mention  third group of QTL detection method that is 
+Bayesian QTL mapping (Bink et al. 2002; Yi and Shriner 2008). In the 90s, with a 
+relatively reduced set of markers, regression methods were used as an approximation to 
+the exact mixture models (with regression being faster computationally). 
+Nowadays, advances in technology give such density of markers that turned the 
+difference between regression and mixture models negligible. A good and accessible 
+review on QTL mapping can be found in Collard et al. (2005). A more technical
+background can be found in (Broman and Sen 2009; Lynch and Walsh 1998).
+
+## Use lmem.qtler
+  In this vignette, you will use _lmem.qtler_ to perform QTL analysis based on
+different methods to account for genetic relatedness.  For this example, a
+doubled  haploid population of 200 individuals was developed by crossing a short line 
+(parent A), with a tall line (parent B). The 200 doubled haploid lines were evaluated 
+in a field trial and the plant height measured in cm (the data is in the file
+**DHpop_pheno**. The population was also genotyped by SNPs, and the data is presented
+in the file **DHpop_geno**. The map location of each of the markers is in the file
+**DHpop_map**.
+
+## Data import.
+```{r, eval = FALSE}
+library(lmem.qtler)
+data (DHpop_pheno)
+data (DHpop_geno)
+data (DHpop_map)
+G.data <- DHpop_geno
+map.data <- DHpop_map
+P.data <- DHpop_pheno
+
+cross.data <- qtl.cross (P.data, G.data, map.data, cross='dh',
+                         heterozygotes=FALSE)
+summary (cross.data)
+
+## Pheno Quality
+pq.diagnostics (crossobj=cross.data)
+
+## Marker Quality
+mq.diagnostics (crossobj=cross.data,I.threshold=0.1,
+              p.val=0.01,na.cutoff=0.1)
+
+```
+
+##  Single Trait QTL mapping
+  In this example we illustrate the simplest situation for QTL mapping by linkage
+analysis, which is the detection of QTLs in a single environment. 
+
+###  Genome wide QTL detection
+  The search of QTLs is done
+  by testing the presence of a QTL at each of the different
+evaluation positions over the chromosomes. When the test is performed
+ONLY at marker positions, this is called marker-based QTL detection, when in addition
+to the marker positions, tests are done in-between markers, we talk of Interval
+Mapping.
+
+```{r, eval = FALSE}
+### QTL_SMA
+QTL.result <- qtl.analysis (crossobj=cross.data,step=0, method='SIM',
+                            trait="height", threshold="Li&Ji", distance=30,  
+                            cofactors=NULL, window.size=30)
+
+### QTL_SIM
+QTL.result <- qtl.analysis ( crossobj=cross.data, step=5,
+                             method='SIM',trait="height", threshold="Li&Ji",
+                             distance=30,cofactors=NULL, window.size=30)
+```
+
+
+### Perform a genome-wide QTL scan by Composite Interval Mapping.
+
+  To increase the power of the genome-wide QTL search, Zeng (1994) and Jansen and Stam
+(1994) simultaneously proposed the use of composite interval mapping (CIM). 
+The idea of CIM is to include a number of cofactors in the QTL scan model that control 
+for the variation caused by the genetic background (i.e. variation caused by QTLs
+outside the region where the QTL is tested).
+For example, after an initial scan of QTLs by SIM, one can perform CIM using the
+candidate QTLs detected in the SIM scan as cofactors. This can be repeated one or more 
+times until the list of detected QTLs does not change. In general one or two rounds of
+CIM are enough. To avoid colinearity between cofactors and tested positions, cofactors
+have to be removed temporarily from the model when testing for QTLs close to cofactor
+positions. The window within which cofactors are removed is set by default to 50 cM.
+
+```{r, eval = FALSE}
+### QTL CIM
+cofactors <- as.vector (QTL.result$selected$marker)
+QTL.result <- qtl.analysis ( crossobj=cross.data, step=5,
+                             method='CIM', trait="height", threshold="Li&Ji", 
+                             distance=30, cofactors=cofactors, window.size=30)
+
+```
+
+##  Multi-Environment (or Multi-Trait) Multi-QTL analysis for balanced populations.
+Mixed models have been used in balanced populations to detect QTL-by-environment (QEI) 
+effects while modeling the variance-covariance matrix. This function performs a
+multi-environment (or multi-trait) multi-QTL biparental analysis modeling the
+correlations across environments (traits).
+The data is the well-known Steptoe x Morex doubled haploid population
+developed in the early 90s by the North American Barley Mapping Project.
+The objective was to improve in the understanding of the genetic basis of agronomic and
+malting quality traits in barley. The population consists of 150 doubled haploids
+lines; of which 148 have been genotyped by SNP markers (we use here 794 SNP markers).
+The population was extensively evaluated for several agronomic and malting quality
+traits (Hayes et al. 1993) in many locations and years (US and Canada). 
+In this example we use information on yield in ten of those trials.
+
+```{r, eval = FALSE}
+data (SxM_geno)
+data (SxM_map)
+data (SxMxE_pheno)
+
+P.data <- SxMxE_pheno
+G.data <- SxM_geno
+map.data <- SxM_map
+
+cross.data <- qtl.cross (P.data, G.data, map.data, cross='dh',
+                          heterozygotes=FALSE)
+
+summary (cross.data)
+jittermap(cross.data)
+
+Pheno Quality
+pq.diagnostics (crossobj=cross.data, boxplot=FALSE)
+
+Marker Quality
+mq.diagnostics (crossobj=cross.data,I.threshold=0.1,
+              p.val=0.01,na.cutoff=0.1)
+
+### QTL_SIM
+QTL.result <- qtl.memq (crossobj = cross.data, P.data = P.data,
+                       env.label = c('ID91','ID92','MAN92','MTd91',
+                        'MTd92','MTi91','MTi92','SKs92','WA91','WA92'),
+                        trait = 'yield', step = 10, method = 'SIM',
+                        threshold = 'Li&Ji', distance = 50, cofactors = NULL,
+                        window.size = 50)
+
+### QTL_CIM
+QTL.result <- qtl.memq (crossobj = cross.data, P.data = P.data,
+                        env.label = c('ID91','ID92','MAN92','MTd91','MTd92',
+                        'MTi91','MTi92','SKs92','WA91','WA92'),
+                        trait = 'yield', step = 10, method = 'CIM',
+                        threshold = 'Li&Ji', distance = 50,
+                        cofactors = QTL.result$selected$marker, window.size = 50)
+
+```
+
+## References
+
+Bink M, Uimari P, Sillanpaa MJ, Janss LLG, Jansen RC (2002) Multiple QTL mapping in 
+      related plant populations via a pedigree-analysis approach. Theor Appl Genet 
+      104:751-762.
+      
+Broman KW, Sen S (2009) A Guide to QTL Mapping with R/qtl.Springer, New York.
+
+Collard BCY, Jahufer MZZ, Brouwer JB, Pang ECK (2005) An introduction to markers, 
+        quantitative trait loci (QTL) mapping and marker-assisted selection for crop 
+        improvement: The basic concepts. Euphytica 142:169-196.
+
+Haley CS, Knott SA (1992) A simple regression method for mapping
+        quantitative trait loci in line crosses using flanking markers.
+        Heredity, 69: 315-324.
+        
+Hayes PM, Liu BH, Knapp SJ, Chen F, Jones B, Blake T, Franckowiak JD, Rasmusson DC,
+        Sorrells M, Ullrich SE, Wesenberg DM, Kleinhofs A (1993) Quantitative trait
+        locus effects and environmental interaction in a sample of North American
+        barley germplasm. Theor Appl Genet 87:392-401.
+        
+Jansen RC, Stam P (1994) High Resolution of Quantitative Traits Into Multiple Loci via 
+        Interval Mapping. Genetics 136:1447-1455.
+        
+Lander ES, Botstein D (1989) Mapping Mendelian Factors Underlying Quantitative Traits 
+        Using Rflp Linkage Maps. Genetics 121:185-199.
+
+Li J, Ji L (2005) Adjusting multiple testing in multilocus analyses using the 
+        eigenvalues of a correlation matrix. Heredity, 95: 221-227.
+        
+Lynch M, Walsh B (1998) Genetics and analysis of quantitative traits. Sinauer 
+        Associates, Sunderland, MA.
+        
+Malosetti, M., C.G. van der Linden, B. Vosman, and F. a van Eeuwijk. 2007a. 
+      A mixed-model approach to association mapping using pedigree information with 
+      an illustration of resistance to Phytophthora infestans in potato.
+      Genetics 175(2): 879-89.
+      
+Malosetti, M., J.M. Ribaut, M. Vargas, J. Crossa, and F. a. Eeuwijk. 2007b. A 
+     multi-trait multi-environment QTL mixed model with an application to drought and 
+     nitrogen stress trials in maize (Zea mays L.). Euphytica 161(1-2): 241-257.
+        
+Martinez O, Curnow RN (1992) Estimating the locations and the
+        sizes of the effects of quantitative trait loci using flanking markers. 
+        Theoretical and Applied Genetics 85(4): 480-488.
+        
+Yi N, Shriner D (2008) Advances in Bayesian multiple quantitative trait loci mapping in
+       experimental crosses. Heredity 100:240-252.
+
+Zeng ZB (1994) Precision Mapping of Quantitative Trait Loci. Genetics 136:1457-1468.
+
+

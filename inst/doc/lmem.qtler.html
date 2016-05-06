@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Lucia Gutierrez" />
+
+<meta name="date" content="2016-05-05" />
+
+<title>Mixed-model QTL detection by linkage analysis</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title">Mixed-model QTL detection by linkage analysis</h1>
+<h4 class="author"><em>Lucia Gutierrez</em></h4>
+<h4 class="date"><em>2016-05-05</em></h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Most of the traits that plant breeders work with in their breeding programs are quantitative traits. What complicates the breeding task is that trait’s variation is the result of a large number of QTL (Quantitative Trait Loci), each one with a minor effect. The objective of QTL mapping is to dissect the complexity of quantitative traits by identifying as many as possible of the individual QTLs. This is sometimes referred to as ‘Mendelizing’ complex traits. A typical QTL experiment (linkage analysis) consists in developing a segregating population; normally by crossing two inbreed lines. Typical segregating populations are originating by selfing the F1 hybrid for one generation (F2), or for several generations to produce recombinant inbred lines (RIL). It is also to use biotechnology techniques that duplicate F1 gametes originating double haploids (DH). In other cases, the F1 is crossed again to one of the parental lines giving origin to a backcross (BC). Independently of the type of segregating population, QTL detection is nothing else than finding statistical associations between the observed phenotypic variation and the variation assessed with molecular markers. The main purpose of a QTL experiment is to answer the following questions:</p>
+<ul>
+<li><p>Number of QTLs affecting a trait of interest?</p></li>
+<li><p>The location of the QTLs? i.e. on which chromosomes and position within chromosome do they locate. Also, it is usually interesting to define a confidence interval for the QTL location.</p></li>
+<li><p>The size of the QTL effect? And an estimate of precision of that estimate (standard error).</p></li>
+<li><p>Which parent is contributing the favorable allele?</p></li>
+</ul>
+<p>In answering those questions, a breeder can make decisions to use the QTL information in his/her breeding strategy, for example in the form of marker-assisted selection. Several methods have been proposed for QTL detection, but roughly speaking methods fall in two groups; those based on mixture models (Lander and Botstein 1989), and those ba sed on regression ideas (Haley and Knott 1992; Martínez and Curnow 1992). For completeness, we should mention third group of QTL detection method that is Bayesian QTL mapping (Bink et al. 2002; Yi and Shriner 2008). In the 90s, with a relatively reduced set of markers, regression methods were used as an approximation to the exact mixture models (with regression being faster computationally). Nowadays, advances in technology give such density of markers that turned the difference between regression and mixture models negligible. A good and accessible review on QTL mapping can be found in Collard et al. (2005). A more technical background can be found in (Broman and Sen 2009; Lynch and Walsh 1998).</p>
+</div>
+<div id="use-lmem.qtler" class="section level2">
+<h2>Use lmem.qtler</h2>
+<p>In this vignette, you will use <em>lmem.qtler</em> to perform QTL analysis based on different methods to account for genetic relatedness. For this example, a doubled haploid population of 200 individuals was developed by crossing a short line (parent A), with a tall line (parent B). The 200 doubled haploid lines were evaluated in a field trial and the plant height measured in cm (the data is in the file <strong>DHpop_pheno</strong>. The population was also genotyped by SNPs, and the data is presented in the file <strong>DHpop_geno</strong>. The map location of each of the markers is in the file <strong>DHpop_map</strong>.</p>
+</div>
+<div id="data-import." class="section level2">
+<h2>Data import.</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(lmem.qtler)
+<span class="kw">data</span> (DHpop_pheno)
+<span class="kw">data</span> (DHpop_geno)
+<span class="kw">data</span> (DHpop_map)
+G.data &lt;-<span class="st"> </span>DHpop_geno
+map.data &lt;-<span class="st"> </span>DHpop_map
+P.data &lt;-<span class="st"> </span>DHpop_pheno
+
+cross.data &lt;-<span class="st"> </span><span class="kw">qtl.cross</span> (P.data, G.data, map.data, <span class="dt">cross=</span><span class="st">'dh'</span>,
+                         <span class="dt">heterozygotes=</span><span class="ot">FALSE</span>)
+<span class="kw">summary</span> (cross.data)
+
+## Pheno Quality
+<span class="kw">pq.diagnostics</span> (<span class="dt">crossobj=</span>cross.data)
+
+## Marker Quality
+<span class="kw">mq.diagnostics</span> (<span class="dt">crossobj=</span>cross.data,<span class="dt">I.threshold=</span><span class="fl">0.1</span>,
+              <span class="dt">p.val=</span><span class="fl">0.01</span>,<span class="dt">na.cutoff=</span><span class="fl">0.1</span>)</code></pre></div>
+</div>
+<div id="single-trait-qtl-mapping" class="section level2">
+<h2>Single Trait QTL mapping</h2>
+<p>In this example we illustrate the simplest situation for QTL mapping by linkage analysis, which is the detection of QTLs in a single environment.</p>
+<div id="genome-wide-qtl-detection" class="section level3">
+<h3>Genome wide QTL detection</h3>
+<p>The search of QTLs is done by testing the presence of a QTL at each of the different evaluation positions over the chromosomes. When the test is performed ONLY at marker positions, this is called marker-based QTL detection, when in addition to the marker positions, tests are done in-between markers, we talk of Interval Mapping.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### QTL_SMA
+QTL.result &lt;-<span class="st"> </span><span class="kw">qtl.analysis</span> (<span class="dt">crossobj=</span>cross.data,<span class="dt">step=</span><span class="dv">0</span>, <span class="dt">method=</span><span class="st">'SIM'</span>,
+                            <span class="dt">trait=</span><span class="st">&quot;height&quot;</span>, <span class="dt">threshold=</span><span class="st">&quot;Li&amp;Ji&quot;</span>, <span class="dt">distance=</span><span class="dv">30</span>,  
+                            <span class="dt">cofactors=</span><span class="ot">NULL</span>, <span class="dt">window.size=</span><span class="dv">30</span>)
+
+### QTL_SIM
+QTL.result &lt;-<span class="st"> </span><span class="kw">qtl.analysis</span> ( <span class="dt">crossobj=</span>cross.data, <span class="dt">step=</span><span class="dv">5</span>,
+                             <span class="dt">method=</span><span class="st">'SIM'</span>,<span class="dt">trait=</span><span class="st">&quot;height&quot;</span>, <span class="dt">threshold=</span><span class="st">&quot;Li&amp;Ji&quot;</span>,
+                             <span class="dt">distance=</span><span class="dv">30</span>,<span class="dt">cofactors=</span><span class="ot">NULL</span>, <span class="dt">window.size=</span><span class="dv">30</span>)</code></pre></div>
+</div>
+<div id="perform-a-genome-wide-qtl-scan-by-composite-interval-mapping." class="section level3">
+<h3>Perform a genome-wide QTL scan by Composite Interval Mapping.</h3>
+<p>To increase the power of the genome-wide QTL search, Zeng (1994) and Jansen and Stam (1994) simultaneously proposed the use of composite interval mapping (CIM). The idea of CIM is to include a number of cofactors in the QTL scan model that control for the variation caused by the genetic background (i.e. variation caused by QTLs outside the region where the QTL is tested). For example, after an initial scan of QTLs by SIM, one can perform CIM using the candidate QTLs detected in the SIM scan as cofactors. This can be repeated one or more times until the list of detected QTLs does not change. In general one or two rounds of CIM are enough. To avoid colinearity between cofactors and tested positions, cofactors have to be removed temporarily from the model when testing for QTLs close to cofactor positions. The window within which cofactors are removed is set by default to 50 cM.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">### QTL CIM
+cofactors &lt;-<span class="st"> </span><span class="kw">as.vector</span> (QTL.result$selected$marker)
+QTL.result &lt;-<span class="st"> </span><span class="kw">qtl.analysis</span> ( <span class="dt">crossobj=</span>cross.data, <span class="dt">step=</span><span class="dv">5</span>,
+                             <span class="dt">method=</span><span class="st">'CIM'</span>, <span class="dt">trait=</span><span class="st">&quot;height&quot;</span>, <span class="dt">threshold=</span><span class="st">&quot;Li&amp;Ji&quot;</span>, 
+                             <span class="dt">distance=</span><span class="dv">30</span>, <span class="dt">cofactors=</span>cofactors, <span class="dt">window.size=</span><span class="dv">30</span>)</code></pre></div>
+</div>
+</div>
+<div id="multi-environment-or-multi-trait-multi-qtl-analysis-for-balanced-populations." class="section level2">
+<h2>Multi-Environment (or Multi-Trait) Multi-QTL analysis for balanced populations.</h2>
+<p>Mixed models have been used in balanced populations to detect QTL-by-environment (QEI) effects while modeling the variance-covariance matrix. This function performs a multi-environment (or multi-trait) multi-QTL biparental analysis modeling the correlations across environments (traits). The data is the well-known Steptoe x Morex doubled haploid population developed in the early 90s by the North American Barley Mapping Project. The objective was to improve in the understanding of the genetic basis of agronomic and malting quality traits in barley. The population consists of 150 doubled haploids lines; of which 148 have been genotyped by SNP markers (we use here 794 SNP markers). The population was extensively evaluated for several agronomic and malting quality traits (Hayes et al. 1993) in many locations and years (US and Canada). In this example we use information on yield in ten of those trials.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span> (SxM_geno)
+<span class="kw">data</span> (SxM_map)
+<span class="kw">data</span> (SxMxE_pheno)
+
+P.data &lt;-<span class="st"> </span>SxMxE_pheno
+G.data &lt;-<span class="st"> </span>SxM_geno
+map.data &lt;-<span class="st"> </span>SxM_map
+
+cross.data &lt;-<span class="st"> </span><span class="kw">qtl.cross</span> (P.data, G.data, map.data, <span class="dt">cross=</span><span class="st">'dh'</span>,
+                          <span class="dt">heterozygotes=</span><span class="ot">FALSE</span>)
+
+<span class="kw">summary</span> (cross.data)
+<span class="kw">jittermap</span>(cross.data)
+
+Pheno Quality
+<span class="kw">pq.diagnostics</span> (<span class="dt">crossobj=</span>cross.data, <span class="dt">boxplot=</span><span class="ot">FALSE</span>)
+
+Marker Quality
+<span class="kw">mq.diagnostics</span> (<span class="dt">crossobj=</span>cross.data,<span class="dt">I.threshold=</span><span class="fl">0.1</span>,
+              <span class="dt">p.val=</span><span class="fl">0.01</span>,<span class="dt">na.cutoff=</span><span class="fl">0.1</span>)
+
+### QTL_SIM
+QTL.result &lt;-<span class="st"> </span><span class="kw">qtl.memq</span> (<span class="dt">crossobj =</span> cross.data, <span class="dt">P.data =</span> P.data,
+                       <span class="dt">env.label =</span> <span class="kw">c</span>(<span class="st">'ID91'</span>,<span class="st">'ID92'</span>,<span class="st">'MAN92'</span>,<span class="st">'MTd91'</span>,
+                        <span class="st">'MTd92'</span>,<span class="st">'MTi91'</span>,<span class="st">'MTi92'</span>,<span class="st">'SKs92'</span>,<span class="st">'WA91'</span>,<span class="st">'WA92'</span>),
+                        <span class="dt">trait =</span> <span class="st">'yield'</span>, <span class="dt">step =</span> <span class="dv">10</span>, <span class="dt">method =</span> <span class="st">'SIM'</span>,
+                        <span class="dt">threshold =</span> <span class="st">'Li&amp;Ji'</span>, <span class="dt">distance =</span> <span class="dv">50</span>, <span class="dt">cofactors =</span> <span class="ot">NULL</span>,
+                        <span class="dt">window.size =</span> <span class="dv">50</span>)
+
+### QTL_CIM
+QTL.result &lt;-<span class="st"> </span><span class="kw">qtl.memq</span> (<span class="dt">crossobj =</span> cross.data, <span class="dt">P.data =</span> P.data,
+                        <span class="dt">env.label =</span> <span class="kw">c</span>(<span class="st">'ID91'</span>,<span class="st">'ID92'</span>,<span class="st">'MAN92'</span>,<span class="st">'MTd91'</span>,<span class="st">'MTd92'</span>,
+                        <span class="st">'MTi91'</span>,<span class="st">'MTi92'</span>,<span class="st">'SKs92'</span>,<span class="st">'WA91'</span>,<span class="st">'WA92'</span>),
+                        <span class="dt">trait =</span> <span class="st">'yield'</span>, <span class="dt">step =</span> <span class="dv">10</span>, <span class="dt">method =</span> <span class="st">'CIM'</span>,
+                        <span class="dt">threshold =</span> <span class="st">'Li&amp;Ji'</span>, <span class="dt">distance =</span> <span class="dv">50</span>,
+                        <span class="dt">cofactors =</span> QTL.result$selected$marker, <span class="dt">window.size =</span> <span class="dv">50</span>)</code></pre></div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Bink M, Uimari P, Sillanpaa MJ, Janss LLG, Jansen RC (2002) Multiple QTL mapping in related plant populations via a pedigree-analysis approach. Theor Appl Genet 104:751-762.</p>
+<p>Broman KW, Sen S (2009) A Guide to QTL Mapping with R/qtl.Springer, New York.</p>
+<p>Collard BCY, Jahufer MZZ, Brouwer JB, Pang ECK (2005) An introduction to markers, quantitative trait loci (QTL) mapping and marker-assisted selection for crop improvement: The basic concepts. Euphytica 142:169-196.</p>
+<p>Haley CS, Knott SA (1992) A simple regression method for mapping quantitative trait loci in line crosses using flanking markers. Heredity, 69: 315-324.</p>
+<p>Hayes PM, Liu BH, Knapp SJ, Chen F, Jones B, Blake T, Franckowiak JD, Rasmusson DC, Sorrells M, Ullrich SE, Wesenberg DM, Kleinhofs A (1993) Quantitative trait locus effects and environmental interaction in a sample of North American barley germplasm. Theor Appl Genet 87:392-401.</p>
+<p>Jansen RC, Stam P (1994) High Resolution of Quantitative Traits Into Multiple Loci via Interval Mapping. Genetics 136:1447-1455.</p>
+<p>Lander ES, Botstein D (1989) Mapping Mendelian Factors Underlying Quantitative Traits Using Rflp Linkage Maps. Genetics 121:185-199.</p>
+<p>Li J, Ji L (2005) Adjusting multiple testing in multilocus analyses using the eigenvalues of a correlation matrix. Heredity, 95: 221-227.</p>
+<p>Lynch M, Walsh B (1998) Genetics and analysis of quantitative traits. Sinauer Associates, Sunderland, MA.</p>
+<p>Malosetti, M., C.G. van der Linden, B. Vosman, and F. a van Eeuwijk. 2007a. A mixed-model approach to association mapping using pedigree information with an illustration of resistance to Phytophthora infestans in potato. Genetics 175(2): 879-89.</p>
+<p>Malosetti, M., J.M. Ribaut, M. Vargas, J. Crossa, and F. a. Eeuwijk. 2007b. A multi-trait multi-environment QTL mixed model with an application to drought and nitrogen stress trials in maize (Zea mays L.). Euphytica 161(1-2): 241-257.</p>
+<p>Martinez O, Curnow RN (1992) Estimating the locations and the sizes of the effects of quantitative trait loci using flanking markers. Theoretical and Applied Genetics 85(4): 480-488.</p>
+<p>Yi N, Shriner D (2008) Advances in Bayesian multiple quantitative trait loci mapping in experimental crosses. Heredity 100:240-252.</p>
+<p>Zeng ZB (1994) Precision Mapping of Quantitative Trait Loci. Genetics 136:1457-1468.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
