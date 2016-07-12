@@ -79,7 +79,7 @@ cross.data <- qtl.cross (P.data, G.data, map.data, cross='dh',
 summary (cross.data)
 
 ## Pheno Quality
-## pq.diagnostics (crossobj=cross.data, boxplot =FALSE)
+pq.diagnostics (crossobj=cross.data, boxplot =FALSE)
 
 ## Marker Quality
 mq.diagnostics (crossobj=cross.data,I.threshold=0.1,

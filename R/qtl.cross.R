@@ -133,7 +133,7 @@ qtl.cross <- function (P.data = NULL, G.data, map.data, cross = "dh",
 
     G.data <- as.matrix(G.data)
     G.data <- G.data[3:nrow(G.data),]
-    G.data[G.data == " 0"] <- "0"
+    G.data[G.data == " 2"] <- "2"
     G.data[G.data == " 1"] <- "1"
 
     G.data <- G.data[which(G.data[, 1] %in% as.character(P.data$genotype)), ]

@@ -2,7 +2,7 @@ Package: lmem.qtler
 Type: Package
 Title: Linear Mixed Effects Models for QTL Mapping for Multienvironment
         and Multitrait Analysis
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(person("Lucia", "Gutierrez", role = "aut",
              email = "gutierrezcha@wisc.edu"),
              person("Gaston", "Quero",role =c("aut","cre"),
@@ -41,6 +41,6 @@ Imports: qtl, lme4, lattice, pastecs, stringr, graphics, utils,
 Encoding: UTF-8
 RoxygenNote: 5.0.1
 NeedsCompilation: no
-Packaged: 2016-05-05 15:16:20 UTC; GQ
+Packaged: 2016-07-12 03:57:09 UTC; GQ
 Repository: CRAN
-Date/Publication: 2016-05-06 00:09:50
+Date/Publication: 2016-07-12 07:49:42

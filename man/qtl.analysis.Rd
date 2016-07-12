@@ -82,17 +82,12 @@ cross.data <- qtl.cross (P.data, G.data, map.data, cross='dh',
 
 summary (cross.data)
 
-# Pheno Quality
-pq.diagnostics (crossobj = cross.data)
-
-# Marker Quality
-mq.diagnostics (crossobj=cross.data, I.threshold=0.1,
-             p.val=0.01,na.cutoff=0.1)
-
-# QTL_SMA
+\dontrun{
+QTL_SMA
 QTL.result <- qtl.analysis (crossobj=cross.data,step=0,
 method='SIM', trait="height", threshold="Li&Ji", distance=30, cofactors=NULL,
 window.size=30)
+}
 
 # QTL_SIM
 QTL.result <- qtl.analysis ( crossobj=cross.data, step=5,
